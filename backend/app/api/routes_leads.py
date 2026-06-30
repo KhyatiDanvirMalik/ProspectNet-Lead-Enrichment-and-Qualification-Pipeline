@@ -4,12 +4,9 @@ from typing import List
 import pydantic
 import csv
 import io
-from transformers import pipeline
+from app.services.groq_client import call_groq
 
 router = APIRouter()
-
-# Initialize CPU-bound local model (runs within Railway's 512MB RAM limit)
-generator = pipeline("text-generation", model="google/flan-t5-small", device=-1)
 
 class PyObjectId(ObjectId):
     @classmethod
@@ -56,25 +53,25 @@ async def process_lead_with_ai(lead_id: str, db):
         company = lead.get("company", "your company")
         industry = config.get("target_industries", "Tech")
 
-        # Local Semantic Scoring
+        # Semantic Scoring via Groq
         score_prompt = f"Does the company {company} belong to the {industry} industry? Answer exactly yes or no."
-        score_res = generator(score_prompt, max_new_tokens=5)[0]["generated_text"].strip().lower()
+        score_res = call_groq(score_prompt, max_tokens=5).strip().lower()
         icp_score = 90 if "yes" in score_res else 40
 
         # Generate Draft 1 (Direct)
         draft1_prompt = f"Write a short, direct cold email to {name} at {company} introducing our software."
-        draft1 = generator(draft1_prompt, max_new_tokens=100)[0]["generated_text"]
+        draft1 = call_groq(draft1_prompt, max_tokens=200)
 
         # Generate Draft 2 (Consultative)
         draft2_prompt = f"Write a short, consultative cold email to {name} asking about challenges at {company}."
-        draft2 = generator(draft2_prompt, max_new_tokens=100)[0]["generated_text"]
+        draft2 = call_groq(draft2_prompt, max_tokens=200)
 
         await db.leads.update_one(
             {"_id": ObjectId(lead_id)},
             {"$set": {
                 "icp_score": icp_score,
                 "top_signal": f"Semantic Match: {score_res}",
-                "enrichment_summary": "Evaluated locally on CPU.",
+                "enrichment_summary": "Evaluated via Groq API.",
                 "outreach_draft_1": draft1,
                 "outreach_draft_2": draft2,
                 "status": "completed"

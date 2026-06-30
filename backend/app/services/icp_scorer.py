@@ -1,32 +1,15 @@
 import json
 import re
 from typing import Dict, Any
-from transformers import pipeline
+from app.services.groq_client import call_groq
 from app.core.config import settings
 from app.models.icp import ICPConfigBase
 
-# Lazy-load the model to save memory on startup. 
-# Using a highly quantized or small model (e.g. Qwen 0.5B or TinyLlama) 
-# ensures it runs CPU-bound within Railway's free tier limits.
-_llm_pipeline = None
-
-def get_llm():
-    global _llm_pipeline
-    if _llm_pipeline is None:
-        _llm_pipeline = pipeline(
-            "text-generation", 
-            model=settings.LLM_MODEL_NAME, 
-            device=-1, # Force CPU
-            max_new_tokens=512
-        )
-    return _llm_pipeline
-
 def score_lead_semantically(icp_config: ICPConfigBase, lead_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Uses a local CPU-bound LLM to semantically score a lead against the ICP 
+    Uses the Groq API to semantically score a lead against the ICP 
     and detect buying signals, avoiding rigid keyword matching.
     """
-    llm = get_llm()
     
     prompt = f"""
     You are an expert sales analyst. Evaluate the following Lead against the Ideal Customer Profile (ICP).
@@ -56,10 +39,10 @@ def score_lead_semantically(icp_config: ICPConfigBase, lead_data: Dict[str, Any]
     """
     
     try:
-        response = llm(prompt)[0]['generated_text']
-        
+        response = call_groq(prompt, max_tokens=512)
+
         # Extract JSON from the generated text
-        json_match = re.search(r'\{.*\}', response.replace(prompt, ''), re.DOTALL)
+        json_match = re.search(r'\{.*\}', response, re.DOTALL)
         if json_match:
             result = json.loads(json_match.group(0))
         else:

@@ -1,31 +1,16 @@
 import json
 import re
-from transformers import pipeline
+from app.services.groq_client import call_groq
 from app.core.config import settings
 from app.models.lead import Lead
 from app.models.icp import ICPConfigBase
 
-# Lazy-load the model to share resources and stay within Railway's free tier CPU/RAM limits.
-_llm_pipeline = None
-
-def get_llm():
-    global _llm_pipeline
-    if _llm_pipeline is None:
-        _llm_pipeline = pipeline(
-            "text-generation", 
-            model=settings.LLM_MODEL_NAME, 
-            device=-1, # Force CPU execution
-            max_new_tokens=600
-        )
-    return _llm_pipeline
-
 def generate_outreach_drafts(lead: Lead, icp_config: ICPConfigBase) -> dict:
     """
-    Generates personalized outreach email drafts using a local CPU-bound LLM.
+    Generates personalized outreach email drafts using the Groq API.
     As per assignment constraints (Section 5), it generates 2 variants (Direct and Consultative)
     instead of 3 due to the inclusion of the Chrome extension.
     """
-    llm = get_llm()
     
     # Extract specific facts to avoid generic filler
     signals = [s.get("signal") for s in lead.buying_signals] if lead.buying_signals else []
@@ -58,10 +43,10 @@ def generate_outreach_drafts(lead: Lead, icp_config: ICPConfigBase) -> dict:
     """
     
     try:
-        response = llm(prompt)[0]['generated_text']
-        
+        response = call_groq(prompt, max_tokens=600)
+
         # Extract JSON from the generated text
-        json_match = re.search(r'\{.*\}', response.replace(prompt, ''), re.DOTALL)
+        json_match = re.search(r'\{.*\}', response, re.DOTALL)
         if json_match:
             drafts = json.loads(json_match.group(0))
         else:
