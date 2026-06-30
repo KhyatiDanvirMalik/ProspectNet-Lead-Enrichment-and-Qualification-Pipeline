@@ -1,57 +1,131 @@
-# ProspectNet 🚀
+# ProspectNet – Lead Enrichment & Qualification Pipeline
 
-**An Automated Lead Enrichment and Qualification Pipeline**
+## Overview
+ProspectNet automates B2B lead research by enriching leads from multiple public sources, qualifying them against a configurable Ideal Customer Profile (ICP), detecting buying signals, generating personalized outreach emails, synchronizing data to a CRM, and providing a web dashboard with a Chrome Extension prototype.
 
-ProspectNet is an end-to-end AI-powered platform designed to streamline the sales prospecting process. It automatically extracts lead data via a Chrome Extension or bulk CSV upload, enriches the profile using web search APIs, scores the lead against a customizable Ideal Customer Profile (ICP), and generates highly personalized outreach drafts using LLMs.
-
----
-
-## 🌟 Key Features
-
-*   **1-Click Chrome Extension:** Extract contact and company data directly from LinkedIn profiles, LinkedIn Company pages, and general company websites.
-*   **Bulk Processing:** Upload a CSV of prospects to enrich hundreds of leads simultaneously.
-*   **Dynamic ICP Scoring:** Configure your target firmographics, tech stack, and buying signals to automatically score leads from 0-100.
-*   **AI Outreach Generation:** Automatically generates "Direct" and "Consultative" cold email drafts tailored to the specific lead's background and detected buying signals.
-*   **CRM Integration Ready:** 1-click sync to push qualified leads directly to your CRM.
-*   **Beautiful Dashboard:** A clean, responsive React frontend (Emerald Green & Amber Yellow theme) to monitor your pipeline, track success rates, and configure ICP weights.
-
----
-
-## 🛠️ Technology Stack
-
-**Frontend**
-*   React.js (Vite)
-*   Lucide React (Icons)
-*   Custom CSS (Modern Card UI)
-*   Docker (Production Build)
-
-**Backend & AI**
-*   Python & FastAPI
-*   GroqCloud API (Fast LLM inference for scoring and outreach)
-*   DuckDuckGo Search API (Real-time web enrichment and signal detection)
-
-**Browser Extension**
-*   Chrome Extension API (Manifest V3)
-*   Vanilla JavaScript & CSS
-
-**Deployment**
-*   Railway (Nixpacks for Backend, Docker for Frontend)
-
----
-
-## 📂 Project Structure
+## Architecture Overview
 
 ```text
-ProspectNet/
-├── backend/                # FastAPI Python server (GroqCloud & DuckDuckGo logic)
-│   ├── main.py             # App entry point
-│   └── requirements.txt    # Python dependencies
-├── frontend/               # React Dashboard
-│   ├── src/                # Components and Pages
-│   ├── Dockerfile          # Frontend containerization
-│   └── package.json        
-├── extension/              # Chrome Extension
-│   ├── manifest.json
-│   ├── popup/              # Extension UI
-│   └── content_scripts/    # Web scraping logic
-└── railway.json            # Deployment configuration
+CSV Upload / Chrome Extension
+        │
+        ▼
+    FastAPI Backend
+        │
+        ├── Website Scraper
+        ├── LinkedIn Public Scraper
+        ├── Google News Scraper
+        ▼
+ Lead Enrichment Pipeline
+        ▼
+ Confidence Assignment
+        ▼
+ ICP Scoring Engine
+        ▼
+ Buying Signal Detection
+        ▼
+ Prompt Builder
+        ▼
+ Groq API
+        ▼
+ Outreach Drafts
+        ├── CRM Sync
+        └── Dashboard
+```
+
+## ICP Scoring Formula
+
+Final Score = (0.70 × ICP Score) + (0.30 × Buying Signal Score)
+
+ICP factors:
+- Company Size – 20%
+- Industry Match – 20%
+- Tech Stack Match – 20%
+- Contact Seniority – 20%
+- Business Relevance – 20%
+
+Buying signals:
+- Recent funding
+- Expansion hiring
+- Product launch
+- Growth news
+- Technology adoption
+
+## Model Choices & Memory Footprint
+
+The assignment specified a local CPU-hosted LLM. During deployment, free-tier hosting memory constraints prevented reliable local inference.
+
+The deployed application therefore uses the Groq API while preserving the same prompt construction pipeline. The inference layer is provider-agnostic and can be switched back to a local model.
+
+Approximate memory:
+- Backend: 300–500 MB
+- Frontend: Static
+- Local LLM: Not deployed
+- Groq API: External inference
+
+## LinkedIn Scraping
+
+- Public page scraping only
+- No LinkedIn API
+- DOM parsing
+- Graceful degradation on failures
+
+Known failure modes:
+- Rate limiting
+- Temporary blocks
+- DOM changes
+- Missing public information
+
+If LinkedIn fails, enrichment continues using the remaining sources.
+
+## Deployment Instructions
+
+### Backend
+
+```bash
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+Create a `.env`:
+
+```env
+GROQ_API_KEY=
+NOTION_API_KEY=
+```
+
+### Frontend
+
+```bash
+npm install
+npm run dev
+```
+
+### Deployment
+
+The application is deployed on **Render** because the Railway free trial was unavailable.
+
+Configure all environment variables through the Render dashboard. Never commit `.env` files.
+
+## Chrome Extension
+
+Implemented:
+- LinkedIn profile extraction
+- Company website extraction
+- Popup UI
+
+Current limitation:
+The extension has backend connectivity issues with the deployed application. The extraction logic and UI are complete, while end-to-end backend integration requires additional work.
+
+## Known Limitations
+
+- Groq API used instead of a local LLM due to free-tier memory limits.
+- LinkedIn scraping depends on public page accessibility.
+- Chrome Extension backend integration is incomplete.
+
+## Future Improvements
+
+- Local LLM support
+- Background jobs
+- Real-time status updates
+- Email verification
+- Outreach sequence builder
