@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "ProspectNet",
+  "version": "1.0.0",
+  "description": "Automated Lead Enrichment and Qualification Pipeline. Extract profile data and enrich leads in one click.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "https://*.railway.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "ProspectNet"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.linkedin.com/in/*",
+        "*://*.linkedin.com/company/*"
+      ],
+      "js": [
+        "content_scripts/linkedin_parser.js"
+      ]
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_matches": [
+        "*://*.linkedin.com/*",
+        "*://*.google.com/*"
+      ],
+      "js": [
+        "content_scripts/website_parser.js"
+      ]
+    }
+  ]
+}

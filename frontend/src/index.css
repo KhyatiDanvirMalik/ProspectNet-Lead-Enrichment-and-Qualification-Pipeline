@@ -1,0 +1,207 @@
+/* 
+ * ProspectNet - Global Styles 
+ * Theme: Emerald Green & Amber Yellow
+ */
+
+:root {
+  /* Primary Theme: Shades of Emerald Green */
+  --primary: #10b981;
+  --primary-light: #34d399;
+  --primary-hover: #059669;
+  --primary-dark: #047857;
+
+  /* Secondary Theme: Shades of Amber/Yellow */
+  --secondary: #f59e0b;
+  --secondary-light: #fbbf24;
+  --secondary-hover: #d97706;
+
+  /* Layout & Surfaces */
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  
+  /* Typography */
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  
+  /* Borders & States */
+  --border: #e2e8f0;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
+/* Base Reset & Typography */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Cards */
+.card {
+  background-color: var(--surface);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border);
+  padding: 24px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+}
+
+/* Buttons */
+.btn-primary, .btn-secondary {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--secondary-hover);
+}
+
+.btn-primary:active:not(:disabled), 
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled, 
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: var(--surface-hover);
+  color: var(--text-muted);
+  border: 1px solid transparent;
+}
+
+.badge-success { 
+  background-color: #d1fae5; 
+  color: var(--primary-dark); 
+  border-color: #a7f3d0;
+}
+
+.badge-warning { 
+  background-color: #fef3c7; 
+  color: var(--secondary-hover); 
+  border-color: #fde68a;
+}
+
+.badge-pending { 
+  background-color: #f1f5f9; 
+  color: var(--text-muted); 
+  border-color: var(--border);
+}
+
+/* Form Elements */
+.input-field {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-main);
+  background-color: var(--surface);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.input-field::placeholder {
+  color: #94a3b8;
+}
+
+/* Tables */
+.table-container {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table-container th {
+  padding: 16px;
+  background-color: var(--surface);
+  border-bottom: 2px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.table-container td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--surface);
+  color: var(--text-main);
+  font-size: 14px;
+  transition: background-color 0.15s ease;
+}
+
+.table-container tr:hover td {
+  background-color: var(--surface-hover);
+}
+
+.table-container tr:last-child td {
+  border-bottom: none;
+}
+
+/* Utilities & Animations */
+@keyframes spin-animation {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin-animation 1s linear infinite;
+}
