@@ -9,7 +9,7 @@ from transformers import pipeline
 router = APIRouter()
 
 # Initialize CPU-bound local model (runs within Railway's 512MB RAM limit)
-generator = pipeline("text2text-generation", model="google/flan-t5-small", device=-1)
+generator = pipeline("text-generation", model="google/flan-t5-small", device=-1)
 
 class PyObjectId(ObjectId):
     @classmethod
